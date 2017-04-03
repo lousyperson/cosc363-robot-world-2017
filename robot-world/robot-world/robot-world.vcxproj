@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{034331eb-ec78-46ef-a725-5560acc67d10}</ProjectGuid>
+    <ProjectGuid>{dac111cf-9812-4b64-8f19-04f22e89502a}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>robot_world</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -149,6 +149,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="freeglut.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\OneDrive\UC\Academic\year 3\sem1\COSC363S1 - Computer Graphics\Lab material (incl. quizzes)\Lab-02 Transformations\Lab02_Files\Humanoid.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

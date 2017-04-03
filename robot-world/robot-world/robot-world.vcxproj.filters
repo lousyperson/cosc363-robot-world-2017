@@ -17,4 +17,9 @@
   <ItemGroup>
     <None Include="freeglut.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\OneDrive\UC\Academic\year 3\sem1\COSC363S1 - Computer Graphics\Lab material (incl. quizzes)\Lab-02 Transformations\Lab02_Files\Humanoid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>
