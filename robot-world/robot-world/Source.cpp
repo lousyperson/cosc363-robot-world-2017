@@ -1,33 +1,95 @@
 //  ========================================================================
-//  COSC363: Computer Graphics Assignment 2017
+//  COSC363: Computer Graphics (2016);  University of Canterbury.
 //
-//  FILE NAME: Humanoid.cpp
-//  See Lab02.pdf for details
+//  FILE NAME: Train.cpp
+//  See Lab03.pdf for details
 //  ========================================================================
 
-#include <iostream>
-#include <fstream>
-#include <cmath> 
+//#include <stdlib.h>
+#include <math.h>
 #include <GL/freeglut.h>
-using namespace std;
 
-//--Globals ---------------------------------------------------------------
-int cam_hgt = 4; //Camera height
-float angle = 10.0;  //Rotation angle for viewing
+GLUquadric *q;    //Required for creating cylindrical objects
+double theta = -10.5;
+int robotMovement = 0;
+bool movementFlag = true;
 
-					 //--Draws a grid of lines on the floor plane -------------------------------
-void drawFloor()
+//-- Ground Plane --------------------------------------------------------
+void floor()
 {
-	glColor3f(0., 0.5, 0.);			//Floor colour
-	for (float i = -50; i <= 50; i++)
+	float white[4] = { 1., 1., 1., 1. };
+	float black[4] = { 0 };
+	glColor4f(0.7, 0.7, 0.7, 1.0);  //The floor is gray in colour
+	glNormal3f(0.0, 1.0, 0.0);
+
+	glMaterialfv(GL_FRONT, GL_SPECULAR, black);
+
+	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
+	glBegin(GL_QUADS);
+	for (int i = -200; i < 200; i++)
 	{
-		glBegin(GL_LINES);			//A set of grid lines on the xz-plane
-		glVertex3f(-50, 0, i);
-		glVertex3f(50, 0, i);
-		glVertex3f(i, 0, -50);
-		glVertex3f(i, 0, 50);
-		glEnd();
+		for (int j = -200; j < 200; j++)
+		{
+			glVertex3f(i, 0.0, j);
+			glVertex3f(i, 0.0, j + 1);
+			glVertex3f(i + 1, 0.0, j + 1);
+			glVertex3f(i + 1, 0.0, j);
+		}
 	}
+	glEnd();
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+
+}
+
+//------- Rail Track ----------------------------------------------------
+// A single circular track of specified radius
+void track(float radius)
+{
+	float angle1, angle2, ca1, sa1, ca2, sa2;
+	float x1, z1, x2, z2, x3, z3, x4, z4;  //four points of a quad
+	float toRad = 3.14159265 / 180.0;  //Conversion from degrees to radians
+
+	glBegin(GL_QUADS);
+	for (int i = 0; i < 360; i += 5)    //5 deg intervals
+	{
+		angle1 = i * toRad;       //Computation of angles, cos, sin etc
+		angle2 = (i + 5) * toRad;
+		ca1 = cos(angle1); ca2 = cos(angle2);
+		sa1 = sin(angle1); sa2 = sin(angle2);
+		x1 = (radius - 0.5)*sa1; z1 = (radius - 0.5)*ca1;
+		x2 = (radius + 0.5)*sa1; z2 = (radius + 0.5)*ca1;
+		x3 = (radius + 0.5)*sa2; z3 = (radius + 0.5)*ca2;
+		x4 = (radius - 0.5)*sa2; z4 = (radius - 0.5)*ca2;
+
+		glNormal3f(0., 1., 0.);       //Quad 1 facing up
+		glVertex3f(x1, 1.0, z1);
+		glVertex3f(x2, 1.0, z2);
+		glVertex3f(x3, 1.0, z3);
+		glVertex3f(x4, 1.0, z4);
+
+		glNormal3f(-sa1, 0.0, -ca1);   //Quad 2 facing inward
+		glVertex3f(x1, 0.0, z1);
+		glVertex3f(x1, 1.0, z1);
+		glNormal3f(-sa2, 0.0, -ca2);
+		glVertex3f(x4, 1.0, z4);
+		glVertex3f(x4, 0.0, z4);
+
+		glNormal3f(sa1, 0.0, ca1);   //Quad 3 facing outward
+		glVertex3f(x2, 1.0, z2);
+		glVertex3f(x2, 0.0, z2);
+		glNormal3f(sa2, 0.0, ca2);
+		glVertex3f(x3, 0.0, z3);
+		glVertex3f(x3, 1.0, z3);
+	}
+	glEnd();
+}
+
+//-------- Tracks  ----------------------------------------------------
+void tracks()
+{
+	glColor4f(0.0, 0.0, 0.3, 1.0);
+	track(115.0);   //Inner track has radius 115 units
+	track(125.0);   //Outer track has radius 125 units
 }
 
 //--Draws a character model constructed using GLUT objects ------------------
@@ -48,6 +110,9 @@ void drawModel()
 
 	glColor3f(0., 0., 1.);			//Right leg
 	glPushMatrix();
+	glTranslatef(-0.8, 4, 0);
+	glRotatef(-robotMovement, 1, 0, 0);
+	glTranslatef(0.8, -4, 0);
 	glTranslatef(-0.8, 2.2, 0);
 	glScalef(1, 4.4, 1);
 	glutSolidCube(1);
@@ -55,6 +120,9 @@ void drawModel()
 
 	glColor3f(0., 0., 1.);			//Left leg
 	glPushMatrix();
+	glTranslatef(0.8, 4, 0);
+	glRotatef(robotMovement, 1, 0, 0);
+	glTranslatef(-0.8, -4, 0);
 	glTranslatef(0.8, 2.2, 0);
 	glScalef(1, 4.4, 1);
 	glutSolidCube(1);
@@ -62,6 +130,9 @@ void drawModel()
 
 	glColor3f(0., 0., 1.);			//Right arm
 	glPushMatrix();
+	glTranslatef(-2, 6.5, 0);
+	glRotatef(robotMovement, 1, 0, 0);
+	glTranslatef(2, -6.5, 0);
 	glTranslatef(-2, 5, 0);
 	glScalef(1, 4, 1);
 	glutSolidCube(1);
@@ -69,74 +140,126 @@ void drawModel()
 
 	glColor3f(0., 0., 1.);			//Left arm
 	glPushMatrix();
+	glTranslatef(2, 6.5, 0);
+	glRotatef(-robotMovement, 1, 0, 0);
+	glTranslatef(-2, -6.5, 0);
 	glTranslatef(2, 5, 0);
 	glScalef(1, 4, 1);
 	glutSolidCube(1);
 	glPopMatrix();
 }
 
-
-//--Display: ---------------------------------------------------------------
-//--This is the main display module containing function calls for generating
-//--the scene.
-void display()
+//---------------------------------------------------------------------
+void initialize(void)
 {
-	float lpos[4] = { 10., 10., 10., 1.0 };  //light's position
+	float grey[4] = { 0.2, 0.2, 0.2, 1.0 };
+	float white[4] = { 1.0, 1.0, 1.0, 1.0 };
+
+	q = gluNewQuadric();
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, grey);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, white);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0.01);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, white);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, white);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_NORMALIZE);
+	gluQuadricDrawStyle(q, GLU_FILL);
+	glClearColor(0.0, 0.0, 0.0, 0.0);  //Background colour
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60., 1.0, 10.0, 1000.0);   //Perspective projection
+
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+	glMaterialf(GL_FRONT, GL_SHININESS, 50);
+}
+
+//-------------------------------------------------------------------
+void display(void)
+{
+	float lgt_pos[] = { 0.0f, 50.0f, 0.0f, 1.0f };  //light0 position (directly above the origin)
+	float spot_pos[] = { -10.0f, 14.0f, 0.0f, 1.0f };
+	float spotdir[] = { -1, -1, 0 };
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0, cam_hgt, 10, 0, 4, 0, 0, 1, 0);
-	glLightfv(GL_LIGHT0, GL_POSITION, lpos);   //Set light position
 
-	glRotatef(angle, 0.0, 1.0, 0.0);  //Rotate the scene about the y-axis
+	gluLookAt(-80, 50, 250, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
-	glDisable(GL_LIGHTING);			//Disable lighting when drawing floor.
-	drawFloor();
+	glLightfv(GL_LIGHT0, GL_POSITION, lgt_pos);   //light position
 
-	glEnable(GL_LIGHTING);	       //Enable lighting when drawing the model
+	floor();
+	tracks();
+
+	glPushMatrix();
+	glRotatef(theta, 0, 1, 0);
+	glTranslatef(0, 1, -120);
+	//glLightfv(GL_LIGHT1, GL_POSITION, spot_pos);
+	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
+	//engine();
+	glRotatef(90, 0, 1, 0);
+	glScalef(5.0, 5.0, 5.0);
 	drawModel();
+	glPopMatrix();
 
-	glFlush();
+	glutSwapBuffers();   //Useful for animation
 }
 
-//------- Initialize OpenGL parameters -----------------------------------
-void initialize()
+void myTimer(int value)
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);	//Background colour
-
-	glEnable(GL_LIGHTING);					//Enable OpenGL states
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum(-5.0, 5.0, -5.0, 5.0, 5.0, 1000.0);   //Camera Frustum
-}
-
-//------------ Special key event callback ---------------------------------
-// To enable the use of left and right arrow keys to rotate the scene
-void special(int key, int x, int y)
-{
-	if (key == GLUT_KEY_LEFT) angle--;
-	else if (key == GLUT_KEY_RIGHT) angle++;
+	theta += 2;
 	glutPostRedisplay();
+	glutTimerFunc(50, myTimer, 0);
 }
 
-//  ------- Main: Initialize glut window and register call backs -----------
+void robotTimer(int value)
+{
+	if (movementFlag && robotMovement < 30)
+	{
+		robotMovement++;
+	}
+	else if (movementFlag)
+	{
+		movementFlag = !movementFlag;
+		robotMovement--;
+	}
+	else if (!movementFlag && robotMovement > -30)
+	{
+		robotMovement--;
+	}
+	else
+	{
+		movementFlag = !movementFlag;
+		robotMovement++;
+	}
+	glutPostRedisplay();
+	glutTimerFunc(50, robotTimer, 0);
+}
+
+//---------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(600, 600);
-	glutInitWindowPosition(10, 10);
-	glutCreateWindow("Humanoid");
+	glutInitWindowPosition(50, 50);
+	glutCreateWindow("Robot World");
 	initialize();
 
 	glutDisplayFunc(display);
-	glutSpecialFunc(special);
+	glutTimerFunc(50, myTimer, 0);
+	glutTimerFunc(50, robotTimer, 0);
 	glutMainLoop();
 	return 0;
 }
