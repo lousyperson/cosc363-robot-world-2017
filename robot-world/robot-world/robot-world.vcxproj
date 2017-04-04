@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1172fd20-577a-4809-8756-cdabd8fcc18f}</ProjectGuid>
+    <ProjectGuid>{8e92c3c3-56b8-40ca-9cb1-60977e2ad768}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>robot_world</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
