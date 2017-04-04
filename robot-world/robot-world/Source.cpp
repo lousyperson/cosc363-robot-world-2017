@@ -1,5 +1,5 @@
 //  ========================================================================
-//  COSC363: Computer Graphics (2017);  University of Canterbury.
+//  COSC363: Computer Graphics Assignment 2017
 //
 //  FILE NAME: Humanoid.cpp
 //  See Lab02.pdf for details
