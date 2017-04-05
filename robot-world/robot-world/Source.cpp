@@ -10,10 +10,33 @@
 #include <GL/freeglut.h>
 
 GLUquadric *q;    //Required for creating cylindrical objects
+GLuint txId[2];		//Texture ids
 double theta = -10.5;
 int robotMovement = 0;
 bool movementFlag = true;
 float lgt_src[4] = { 0.0f, 50.0f, 0.0f, 1.0f };
+float eye_x = 12, eye_y = 1, eye_z = 12;		//Initial camera position
+float look_x = 12, look_y = 1, look_z = 10;		//"Look-at" point along -z direction
+float theta = 0;		//Look angle
+int step = 0;		//camera motion
+
+void loadTexture()
+{
+	glGenTextures(2, txId); 	// Create 2 texture ids
+
+	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture
+	loadTGA("Wall.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	//Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[1]);  //Use this texture
+	loadTGA("Floor.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	//Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+}
 
 //-- Ground Plane --------------------------------------------------------
 void floor()
@@ -252,6 +275,18 @@ void robotTimer(int value)
 	glutTimerFunc(50, robotTimer, 0);
 }
 
+//--------------------------------------------------------------------------------
+void special(int key, int x, int y)
+{
+	step = 0;
+	if (key == GLUT_KEY_LEFT) theta += 0.1;   //in radians
+	else if (key == GLUT_KEY_RIGHT) theta -= 0.1;
+	else if (key == GLUT_KEY_DOWN) step = -1;
+	else if (key == GLUT_KEY_UP) step = 1;
+
+	glutPostRedisplay();
+}
+
 //---------------------------------------------------------------------
 int main(int argc, char** argv)
 {
@@ -265,6 +300,7 @@ int main(int argc, char** argv)
 	glutDisplayFunc(display);
 	glutTimerFunc(50, myTimer, 0);
 	glutTimerFunc(50, robotTimer, 0);
+	glutSpecialFunc(special);
 	glutMainLoop();
 	return 0;
 }
