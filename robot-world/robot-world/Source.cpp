@@ -13,6 +13,7 @@ GLUquadric *q;    //Required for creating cylindrical objects
 double theta = -10.5;
 int robotMovement = 0;
 bool movementFlag = true;
+float lgt_src[4] = { 0.0f, 20.0f, 0.0f, 1.0f };
 
 //-- Ground Plane --------------------------------------------------------
 void floor()
@@ -97,55 +98,55 @@ void drawModel()
 {
 	glColor3f(1., 0.78, 0.06);		//Head
 	glPushMatrix();
-	glTranslatef(0, 7.7, 0);
-	glutSolidCube(1.4);
+		glTranslatef(0, 7.7, 0);
+		glutSolidCube(1.4);
 	glPopMatrix();
 
 	glColor3f(1., 0., 0.);			//Torso
 	glPushMatrix();
-	glTranslatef(0, 5.5, 0);
-	glScalef(3, 3, 1.4);
-	glutSolidCube(1);
+		glTranslatef(0, 5.5, 0);
+		glScalef(3, 3, 1.4);
+		glutSolidCube(1);
 	glPopMatrix();
 
 	glColor3f(0., 0., 1.);			//Right leg
 	glPushMatrix();
-	glTranslatef(-0.8, 4, 0);
-	glRotatef(-robotMovement, 1, 0, 0);
-	glTranslatef(0.8, -4, 0);
-	glTranslatef(-0.8, 2.2, 0);
-	glScalef(1, 4.4, 1);
-	glutSolidCube(1);
+		glTranslatef(-0.8, 4, 0);
+		glRotatef(-robotMovement, 1, 0, 0);
+		glTranslatef(0.8, -4, 0);
+		glTranslatef(-0.8, 2.2, 0);
+		glScalef(1, 4.4, 1);
+		glutSolidCube(1);
 	glPopMatrix();
 
 	glColor3f(0., 0., 1.);			//Left leg
 	glPushMatrix();
-	glTranslatef(0.8, 4, 0);
-	glRotatef(robotMovement, 1, 0, 0);
-	glTranslatef(-0.8, -4, 0);
-	glTranslatef(0.8, 2.2, 0);
-	glScalef(1, 4.4, 1);
-	glutSolidCube(1);
+		glTranslatef(0.8, 4, 0);
+		glRotatef(robotMovement, 1, 0, 0);
+		glTranslatef(-0.8, -4, 0);
+		glTranslatef(0.8, 2.2, 0);
+		glScalef(1, 4.4, 1);
+		glutSolidCube(1);
 	glPopMatrix();
 
 	glColor3f(0., 0., 1.);			//Right arm
 	glPushMatrix();
-	glTranslatef(-2, 6.5, 0);
-	glRotatef(robotMovement, 1, 0, 0);
-	glTranslatef(2, -6.5, 0);
-	glTranslatef(-2, 5, 0);
-	glScalef(1, 4, 1);
-	glutSolidCube(1);
+		glTranslatef(-2, 6.5, 0);
+		glRotatef(robotMovement, 1, 0, 0);
+		glTranslatef(2, -6.5, 0);
+		glTranslatef(-2, 5, 0);
+		glScalef(1, 4, 1);
+		glutSolidCube(1);
 	glPopMatrix();
 
 	glColor3f(0., 0., 1.);			//Left arm
 	glPushMatrix();
-	glTranslatef(2, 6.5, 0);
-	glRotatef(-robotMovement, 1, 0, 0);
-	glTranslatef(-2, -6.5, 0);
-	glTranslatef(2, 5, 0);
-	glScalef(1, 4, 1);
-	glutSolidCube(1);
+		glTranslatef(2, 6.5, 0);
+		glRotatef(-robotMovement, 1, 0, 0);
+		glTranslatef(-2, -6.5, 0);
+		glTranslatef(2, 5, 0);
+		glScalef(1, 4, 1);
+		glutSolidCube(1);
 	glPopMatrix();
 }
 
@@ -187,9 +188,9 @@ void initialize(void)
 //-------------------------------------------------------------------
 void display(void)
 {
-	float lgt_pos[] = { 0.0f, 50.0f, 0.0f, 1.0f };  //light0 position (directly above the origin)
-	float spot_pos[] = { -10.0f, 14.0f, 0.0f, 1.0f };
-	float spotdir[] = { -1, -1, 0 };
+	//float lgt_pos[] = { 0.0f, 50.0f, 0.0f, 1.0f };  //light0 position (directly above the origin)
+	//float spot_pos[] = { -10.0f, 14.0f, 0.0f, 1.0f };
+	//float spotdir[] = { -1, -1, 0 };
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
@@ -197,20 +198,33 @@ void display(void)
 
 	gluLookAt(-80, 50, 250, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
-	glLightfv(GL_LIGHT0, GL_POSITION, lgt_pos);   //light position
+	glLightfv(GL_LIGHT0, GL_POSITION, lgt_src);   //light position
 
 	floor();
 	tracks();
 
-	glPushMatrix();
-	glRotatef(theta, 0, 1, 0);
-	glTranslatef(0, 1, -120);
-	//glLightfv(GL_LIGHT1, GL_POSITION, spot_pos);
-	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
-	//engine();
-	glRotatef(90, 0, 1, 0);
-	glScalef(5.0, 5.0, 5.0);
-	drawModel();
+	float shadowMat[16] = { lgt_src[1],0,0,0, -lgt_src[0],0,-lgt_src[2],-1, 0,0,lgt_src[1],0, 0,0,0,lgt_src[1] };
+
+	glEnable(GL_LIGHTING);
+	glPushMatrix();											//Draw Actual Object
+		glRotatef(theta, 0, 1, 0);
+		glTranslatef(0, 1, -120);
+		//glLightfv(GL_LIGHT1, GL_POSITION, spot_pos);
+		//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
+		glRotatef(90, 0, 1, 0);
+		glScalef(5.0, 5.0, 5.0);
+		drawModel();
+	glPopMatrix();
+
+	glDisable(GL_LIGHTING); 
+	glPushMatrix();											//Draw Shadow Object
+		glMultMatrixf(shadowMat);
+		glRotatef(theta, 0, 1, 0);
+		glTranslatef(0, 1, -120);
+		glRotatef(90, 0, 1, 0);
+		glScalef(5.0, 5.0, 5.0);
+		glColor4f(0.2, 0.2, 0.2, 1.0);
+		drawModel();
 	glPopMatrix();
 
 	glutSwapBuffers();   //Useful for animation
