@@ -13,7 +13,7 @@ GLUquadric *q;    //Required for creating cylindrical objects
 double theta = -10.5;
 int robotMovement = 0;
 bool movementFlag = true;
-float lgt_src[4] = { 0.0f, 20.0f, 0.0f, 1.0f };
+float lgt_src[4] = { 0.0f, 50.0f, 0.0f, 1.0f };
 
 //-- Ground Plane --------------------------------------------------------
 void floor()
@@ -160,14 +160,9 @@ void initialize(void)
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, grey);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0.01);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, white);
-	glLightfv(GL_LIGHT1, GL_SPECULAR, white);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
@@ -189,8 +184,6 @@ void initialize(void)
 void display(void)
 {
 	//float lgt_pos[] = { 0.0f, 50.0f, 0.0f, 1.0f };  //light0 position (directly above the origin)
-	//float spot_pos[] = { -10.0f, 14.0f, 0.0f, 1.0f };
-	//float spotdir[] = { -1, -1, 0 };
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
@@ -209,8 +202,6 @@ void display(void)
 	glPushMatrix();											//Draw Actual Object
 		glRotatef(theta, 0, 1, 0);
 		glTranslatef(0, 1, -120);
-		//glLightfv(GL_LIGHT1, GL_POSITION, spot_pos);
-		//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
 		glRotatef(90, 0, 1, 0);
 		glScalef(5.0, 5.0, 5.0);
 		drawModel();
