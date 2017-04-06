@@ -135,10 +135,10 @@ void drawSkyBox(void)
 	glBindTexture(GL_TEXTURE_2D, skybox[SKY_BOTTOM]);
 	glBegin(GL_QUADS);
 		//bottom face
-	glTexCoord2f(0, 0); glVertex3f(0, 0, size);
-	glTexCoord2f(1, 0); glVertex3f(size, 0, size);
-	glTexCoord2f(1, 1); glVertex3f(size, 0, 0);
-	glTexCoord2f(0, 1); glVertex3f(0, 0, 0);
+	glTexCoord2f(0, 0); glVertex3f(-size, -size, size);
+	glTexCoord2f(1, 0); glVertex3f(size, -size, size);
+	glTexCoord2f(1, 1); glVertex3f(size, -size, -size);
+	glTexCoord2f(0, 1); glVertex3f(-size, -size, -size);
 	glEnd();
 
 	glEnable(GL_LIGHTING);
