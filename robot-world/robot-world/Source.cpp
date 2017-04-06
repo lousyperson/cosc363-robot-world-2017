@@ -43,18 +43,6 @@ float bb8Rotation = 0;
 float bb8Movement = 0;
 bool bb8FrontBool = true;
 
-//void loadTexture(void)
-//{
-//	glGenTextures(1, txId); 	// Create 1 texture id
-//
-//	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture
-//	loadTGA("Floor.tga");
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);		//Set texture parameters
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//}
-
 void loadTexture(void)
 {
 	glGenTextures(7, txId); 	// Create 1 texture id
@@ -96,32 +84,6 @@ void loadTexture(void)
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
-
-//unsigned int loadTexture(char* filename)  //load the filename named texture
-//{
-//	unsigned int num;       //the id for the texture
-//	glGenTextures(1, &num);  //we generate a unique one
-//	loadTGA(filename);
-//	glBindTexture(GL_TEXTURE_2D, num);       //and use the texture, we have just generated
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //if the texture is smaller, than the image, we get the avarege of the pixels next to it
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //same if the image bigger
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);      //we repeat the pixels in the edge of the texture, it will hide that 1px wide line at the edge of the cube, which you have seen in the video
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);      //we do it for vertically and horizontally (previous line)
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//	return num;     //and we return the id
-//}
-
-//void initSkybox(void)
-//{
-//	skybox[SKY_LEFT] = loadTexture("skybox/tropday_left.tga");
-//	skybox[SKY_BACK] = loadTexture("skybox/tropday_back.tga");
-//	skybox[SKY_RIGHT] = loadTexture("skybox/tropday_right.tga");
-//	skybox[SKY_FRONT] = loadTexture("skybox/tropday_front.tga");
-//	skybox[SKY_TOP] = loadTexture("skybox/tropday_up.tga");
-//	//skybox[SKY_TOP] = loadTexture("skybox/top.tga");
-//	skybox[SKY_BOTTOM] = loadTexture("skybox/tropday_down.tga");
-//	//skybox[SKY_BOTTOM] = loadTexture("skybox/bottom.tga");
-//}
 
 void drawSkyBox(void)
 {
@@ -195,56 +157,6 @@ void drawSkyBox(void)
 	glEnable(GL_LIGHTING);
 //	glEnable(GL_DEPTH_TEST);
 }
-
-//void drawCube(void)
-//{
-//	int size = 200;
-//	float difamb[] = { 1.0,0.5,0.3,1.0 };
-//	glBegin(GL_QUADS);
-//		//front face
-//		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, difamb);
-//		glNormal3f(0.0, 0.0, 1.0);
-//		glVertex3f(size, size, size);
-//		glVertex3f(0, size, size);
-//		glVertex3f(0, 0, size);
-//		glVertex3f(size, 0, size);
-//
-//		//left face
-//		glNormal3f(-1.0, 0.0, 0.0);
-//		glVertex3f(0, size, size);
-//		glVertex3f(0, size, 0);
-//		glVertex3f(0, 0, 0);
-//		glVertex3f(0, 0, size);
-//
-//		//back face
-//		glNormal3f(0.0, 0.0, -1.0);
-//		glVertex3f(size, size, 0);
-//		glVertex3f(0, size, 0);
-//		glVertex3f(0, 0, 0);
-//		glVertex3f(size, 0, 0);
-//
-//		//right face
-//		glNormal3f(1.0, 0.0, 0.0);
-//		glVertex3f(size, size, 0);
-//		glVertex3f(size, size, size);
-//		glVertex3f(size, 0, size);
-//		glVertex3f(size, 0, 0);
-//
-//		//top face
-//		glNormal3f(0.0, 1.0, 0.0);
-//		glVertex3f(size, size, size);
-//		glVertex3f(0, size, size);
-//		glVertex3f(0, size, 0);
-//		glVertex3f(size, size, 0);
-//
-//		//bottom face
-//		glNormal3f(0.0, -1.0, 0.0);
-//		glVertex3f(size, 0, size);
-//		glVertex3f(0, 0, size);
-//		glVertex3f(0, 0, 0);
-//		glVertex3f(size, 0, 0);
-//	glEnd();
-//}
 
 void floor()
 {
