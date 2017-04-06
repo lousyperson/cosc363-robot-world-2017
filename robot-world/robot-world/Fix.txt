@@ -1,2 +1,2 @@
 stop camera moving continuously front and back
-jumping robot leg crossing
+jumping robot leg crossing (write in report)

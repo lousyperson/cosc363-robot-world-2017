@@ -2,7 +2,7 @@
 	The robot model may be constructed using a set of graphics primitives or by using any of the standard techniques for the construction of a mesh model.
 	You are not required to develop highly complex or articulated models for this task.
 
-[2.2]	The robot needs to perform an action. Design a simple task (animation) for this purpose, such as moving an object from one point to another,
+2.2	The robot needs to perform an action. Design a simple task (animation) for this purpose, such as moving an object from one point to another,
 	or performing an acrobatic somersault!
 
 2.3	In addition to the robot(s), the scene should contain at least three other composite objects, each of which may be constructed using polygonal meshes,
@@ -11,7 +11,7 @@
 
 2.5 There must be at least two light sources in the scene, and at least two objects must have specular reflections.
 
-2.6 You should be able to move camera through the scene using the standard set of directional keys:
+[2.6] You should be able to move camera through the scene using the standard set of directional keys:
 	Up arrow: move camera forward in the current direction,
 	Down arrow: move camera backward in the current direction, keeping the look direction same,
 	Left arrow: Turn left by 5 degs,
@@ -20,7 +20,7 @@
 
 2.7	At least three different textures must be used in the scene. It is not necessary to texture-map all surfaces.
 
-(1 mark)	Planar shadows cast by at least one object
+[(1 mark)]	Planar shadows cast by at least one object
 (1 mark)	A spot light on a moving/rotating object.
 			The movement of the light should be clearly visible. One of the two light sources in the scene can be used as a spotlight.
 (2 marks)	Two camera modes:

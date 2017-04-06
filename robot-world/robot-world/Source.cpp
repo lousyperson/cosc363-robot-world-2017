@@ -18,7 +18,7 @@ GLuint txId[7];		//Texture ids
 double theta = -10.5;
 float robotMovement = 0.0;
 bool flag = true;
-float lgt_src[4] = { 0.0f, 50.0f, 0.0f, 1.0f };
+float lgt_src[4] = { 0.0f, 200.0f, 0.0f, 1.0f };
 float eye_x = 0, eye_y = 10, eye_z = 12;		//Initial camera position
 float look_x = 0, look_y = 10, look_z = 10;		//"Look-at" point along -z direction
 float lookTheta = 0;		//Look angle
@@ -32,15 +32,6 @@ float jumpHandAngle = 0;
 float jumpLegAngle = 0;
 int jumpHeight = 0;
 bool jumpUpBool = true;
-
-// volleyball robot inits
-float volleyballHand = 0;
-int volleyballHeight = 0;
-bool volleyballUpBool = true;
-
-// skybox inits
-enum { SKY_LEFT = 0, SKY_BACK, SKY_RIGHT, SKY_FRONT, SKY_TOP, SKY_BOTTOM };
-unsigned int skybox[6];
 
 // dog inits
 float legLeft = 0;
@@ -134,7 +125,9 @@ void loadTexture(void)
 
 void drawSkyBox(void)
 {
-	float size = 200;
+	float size = 150.;
+	float floorHeight = -0.1;
+
 	glDisable(GL_LIGHTING);		//turn off lighting, when making the skybox
 //	glDisable(GL_DEPTH_TEST);		//turn off depth texting
 	glEnable(GL_TEXTURE_2D);		//and turn on texturing
@@ -146,17 +139,17 @@ void drawSkyBox(void)
 	glBindTexture(GL_TEXTURE_2D, txId[1]);
 	glNormal3f(0.0, 1.0, 0.0);
 	glBegin(GL_QUADS);   		 //down
-	glTexCoord2f(0, 0); glVertex3f(-size, -size, size);
-	glTexCoord2f(1, 0); glVertex3f(size, -size, size);
-	glTexCoord2f(1, 1); glVertex3f(size, -size, -size);
-	glTexCoord2f(0, 1); glVertex3f(-size, -size, -size);
+	glTexCoord2f(0, 0); glVertex3f(-size, floorHeight, size);
+	glTexCoord2f(1, 0); glVertex3f(size, floorHeight, size);
+	glTexCoord2f(1, 1); glVertex3f(size, floorHeight, -size);
+	glTexCoord2f(0, 1); glVertex3f(-size, floorHeight, -size);
 	glEnd();
 
 	glBindTexture(GL_TEXTURE_2D, txId[2]);
 	glNormal3f(0.0, 0.0, -1.0);
 	glBegin(GL_QUADS);   		 //back
-	glTexCoord2f(0, 0); glVertex3f(size, -size, size);
-	glTexCoord2f(1, 0); glVertex3f(-size, -size, size);
+	glTexCoord2f(0, 0); glVertex3f(size, floorHeight, size);
+	glTexCoord2f(1, 0); glVertex3f(-size, floorHeight, size);
 	glTexCoord2f(1, 1); glVertex3f(-size, size, size);
 	glTexCoord2f(0, 1); glVertex3f(size, size, size);
 	glEnd();
@@ -164,18 +157,18 @@ void drawSkyBox(void)
 	glBindTexture(GL_TEXTURE_2D, txId[3]);
 	glNormal3f(0.0, 0.0, 1.0);
 	glBegin(GL_QUADS);   		 //front
-	glTexCoord2f(0, 0); glVertex3f(size, -size, -size);
+	glTexCoord2f(0, 0); glVertex3f(size, floorHeight, -size);
 	glTexCoord2f(1, 0); glVertex3f(size, size, -size);
 	glTexCoord2f(1, 1); glVertex3f(-size, size, -size);
-	glTexCoord2f(0, 1); glVertex3f(-size, -size, -size);
+	glTexCoord2f(0, 1); glVertex3f(-size, floorHeight, -size);
 	
 	glEnd();
 
 	glBindTexture(GL_TEXTURE_2D, txId[4]);
 	glNormal3f(1.0, 0.0, 0.0);
 	glBegin(GL_QUADS);   		 //left
-	glTexCoord2f(0, 0); glVertex3f(size, -size, -size);
-	glTexCoord2f(1, 0); glVertex3f(size, -size, size);
+	glTexCoord2f(0, 0); glVertex3f(size, floorHeight, -size);
+	glTexCoord2f(1, 0); glVertex3f(size, floorHeight, size);
 	glTexCoord2f(1, 1); glVertex3f(size, size, size);
 	glTexCoord2f(0, 1); glVertex3f(size, size, -size);
 	glEnd();
@@ -183,8 +176,8 @@ void drawSkyBox(void)
 	glBindTexture(GL_TEXTURE_2D, txId[5]);
 	glNormal3f(-1.0, 0.0, 0.0);
 	glBegin(GL_QUADS);   		 //right
-	glTexCoord2f(0, 0); glVertex3f(-size, -size, size);
-	glTexCoord2f(1, 0); glVertex3f(-size, -size, -size);
+	glTexCoord2f(0, 0); glVertex3f(-size, floorHeight, size);
+	glTexCoord2f(1, 0); glVertex3f(-size, floorHeight, -size);
 	glTexCoord2f(1, 1); glVertex3f(-size, size, -size);
 	glTexCoord2f(0, 1); glVertex3f(-size, size, size);
 	glEnd();
@@ -268,59 +261,59 @@ void floor()
 }
 
 //--Draws a character model constructed using GLUT objects ------------------
-void drawModel(void)
+void drawRunningModel(bool isShadow)
 {
 	glDisable(GL_TEXTURE_2D);
 
-	glColor3f(1., 0.78, 0.06);		//Head
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(1., 0.78, 0.06);		//Head
 	glPushMatrix();
-		glTranslatef(0, 7.7, 0);
+		glTranslatef(0, 5.5, 0);
 		glutSolidCube(1.4);
 	glPopMatrix();
 
-	glColor3f(1., 0., 0.);			//Torso
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(1., 0., 0.);			//Torso
 	glPushMatrix();
-		glTranslatef(0, 5.5, 0);
+		glTranslatef(0, 3.3, 0);
 		glScalef(3, 3, 1.4);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Right leg
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(0., 0., 1.);			//Right leg
 	glPushMatrix();
-		glTranslatef(-0.8, 4, 0);
+		glTranslatef(-0.8, 1.8, 0);
 		glRotatef(-robotMovement, 1, 0, 0);
-		glTranslatef(0.8, -4, 0);
-		glTranslatef(-0.8, 2.2, 0);
+		glTranslatef(0.8, -1.8, 0);
+		glTranslatef(-0.8, 0, 0);
+		glScalef(1, 4.4, 1);
+		glutSolidCube(1);
+	glPopMatrix();
+		
+	glPushMatrix();		//Left leg
+		glTranslatef(0.8, 1.8, 0);
+		glRotatef(robotMovement, 1, 0, 0);
+		glTranslatef(-0.8, -1.8, 0);
+		glTranslatef(0.8, 0, 0);
 		glScalef(1, 4.4, 1);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Left leg
-	glPushMatrix();
-		glTranslatef(0.8, 4, 0);
+	glPushMatrix();		//Right arm
+		glTranslatef(-2, 4.3, 0);
 		glRotatef(robotMovement, 1, 0, 0);
-		glTranslatef(-0.8, -4, 0);
-		glTranslatef(0.8, 2.2, 0);
-		glScalef(1, 4.4, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glColor3f(0., 0., 1.);			//Right arm
-	glPushMatrix();
-		glTranslatef(-2, 6.5, 0);
-		glRotatef(robotMovement, 1, 0, 0);
-		glTranslatef(2, -6.5, 0);
-		glTranslatef(-2, 5, 0);
+		glTranslatef(2, -4.3, 0);
+		glTranslatef(-2, 2.8, 0);
 		glScalef(1, 4, 1);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Left arm
-	glPushMatrix();
-		glTranslatef(2, 6.5, 0);
+	glPushMatrix();		//Left arm
+		glTranslatef(2, 4.3, 0);
 		glRotatef(-robotMovement, 1, 0, 0);
-		glTranslatef(-2, -6.5, 0);
-		glTranslatef(2, 5, 0);
+		glTranslatef(-2, -4.3, 0);
+		glTranslatef(2, 2.8, 0);
 		glScalef(1, 4, 1);
 		glutSolidCube(1);
 	glPopMatrix();
@@ -357,24 +350,27 @@ void robotTimer(int value)
 	glutTimerFunc(50, robotTimer, 0);
 }
 
-void drawJumpingRobot(void)
+void drawJumpingRobot(bool isShadow)
 {
 	glDisable(GL_TEXTURE_2D);
 
-	glColor3f(1., 0.78, 0.06);		//Head
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(1., 0.78, 0.06);		//Head
 	glPushMatrix();
 		glTranslatef(0, 7.7, 0);
 		glutSolidCube(1.4);
 	glPopMatrix();
 
-	glColor3f(1., 0., 0.);			//Torso
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(1., 0., 0.);			//Torso
 	glPushMatrix();
 		glTranslatef(0, 5.5, 0);
 		glScalef(3, 3, 1.4);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Right leg
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(0., 0., 1.);			//Right leg
 	glPushMatrix();
 		glTranslatef(-0.8, 4, 0);
 		glRotatef(jumpLegAngle, 0, 0, 1);
@@ -384,8 +380,7 @@ void drawJumpingRobot(void)
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Left leg
-	glPushMatrix();
+	glPushMatrix();		//Left leg
 		glTranslatef(0.8, 4, 0);
 		glRotatef(-jumpLegAngle, 0, 0, 1);
 		glTranslatef(-0.8, -4, 0);
@@ -394,8 +389,7 @@ void drawJumpingRobot(void)
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Right arm
-	glPushMatrix();
+	glPushMatrix();		//Right arm
 		glTranslatef(-2, 6.5, 0);
 		glRotatef(jumpHandAngle, 0, 0, 1);
 		glTranslatef(2, -6.5, 0);
@@ -404,8 +398,7 @@ void drawJumpingRobot(void)
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Left arm
-	glPushMatrix();
+	glPushMatrix();		//Left arm
 		glTranslatef(2, 6.5, 0);
 		glRotatef(-jumpHandAngle, 0, 0, 1);
 		glTranslatef(-2, -6.5, 0);
@@ -473,25 +466,28 @@ void drawVolleyballRobot(void)
 	glPopMatrix();
 }
 
-void drawDog(void)
+void drawDog(bool isShadow)
 {
 	glDisable(GL_TEXTURE_2D);
 
-	glColor3f(1., 0.78, 0.06);		//Head
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(1., 0.78, 0.06);		//Head
 	glPushMatrix();
 		glTranslatef(0, 4, 4);
 		glScalef(1, 1, 2);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(1., 0., 0.);			//Torso
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(1., 0., 0.);			//Torso
 	glPushMatrix();
 		glTranslatef(0, 2.5, 0);
 		glScalef(3, 2, 7);
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Left front leg
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(0., 0., 1.);			//Left front leg
 	glPushMatrix();
 		glTranslatef(-0.5, 3, 2.5);
 		glRotatef(legLeft, 1, 0, 0);
@@ -501,8 +497,7 @@ void drawDog(void)
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Right front leg
-	glPushMatrix();
+	glPushMatrix();		//Right front leg
 		glTranslatef(0.5, 3, 2.5);
 		glRotatef(-legLeft, 1, 0, 0);
 		glTranslatef(-0.5, -3, -2.5);
@@ -511,8 +506,7 @@ void drawDog(void)
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Left rear leg
-	glPushMatrix();
+	glPushMatrix();		//Left rear leg
 		glTranslatef(-0.5, 3, -2.5);
 		glRotatef(-legLeft, 1, 0, 0);
 		glTranslatef(0.5, -3, 2.5);
@@ -521,8 +515,7 @@ void drawDog(void)
 		glutSolidCube(1);
 	glPopMatrix();
 
-	glColor3f(0., 0., 1.);			//Right rear leg
-	glPushMatrix();
+	glPushMatrix();		//Right rear leg
 		glTranslatef(0.5, 3, -2.5);
 		glRotatef(legLeft, 1, 0, 0);
 		glTranslatef(-0.5, -3, 2.5);
@@ -592,30 +585,34 @@ void jumpTimer(int value)
 	glutTimerFunc(50, jumpTimer, 0);
 }
 
-void drawBB8(void)
+void drawBB8(bool isShadow)
 {
-	glColor4f(1.0, 1.0, 1.0, 1.0);
-
-	glEnable(GL_TEXTURE_2D);
-	gluQuadricTexture(q, GL_TRUE);
-	glBindTexture(GL_TEXTURE_2D, txId[0]);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else
+	{
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glEnable(GL_TEXTURE_2D);
+		gluQuadricTexture(q, GL_TRUE);
+		glBindTexture(GL_TEXTURE_2D, txId[0]);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	}
 
 	glPushMatrix();		// BB8 Main Ball
 		glTranslatef(0, 0, bb8Movement);
 		glRotatef(-bb8Rotation, 0.0, 1.0, 0.0);
-		glTranslatef(0.0, 4.0, 0.0);
+		glTranslatef(0.0, 3.0, 0.0);
 		glRotatef(-120, 1, 0, 0);
 		gluSphere(q, 2.5, 36, 17);
 	glPopMatrix();
 
 	glPushMatrix();		// BB8 Head
 		glTranslatef(0, 0, bb8Movement);
-		glTranslatef(0.0, 6.5, 0.0);
+		glTranslatef(0.0, 5.5, 0.0);
 		glRotatef(-90, 1, 0, 0);
 		gluSphere(q, 1.5, 36, 17);
 	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
+
+	if (!isShadow) glDisable(GL_TEXTURE_2D);
 }
 
 void bb8Timer(int value)
@@ -708,41 +705,65 @@ void display(void)
 
 	float shadowMat[16] = { lgt_src[1],0,0,0, -lgt_src[0],0,-lgt_src[2],-1, 0,0,lgt_src[1],0, 0,0,0,lgt_src[1] };
 
-	glEnable(GL_LIGHTING);
-	glPushMatrix();											//Draw Actual Object
+	glEnable(GL_LIGHTING);		//Draw Running Robot
+	glPushMatrix();
 		glRotatef(theta, 0, 1, 0);
 		glTranslatef(0, 1, -50);
 		glRotatef(90, 0, 1, 0);		// to face where robot is moving
-		drawModel();
+		drawRunningModel(false);
 	glPopMatrix();
 
-	glDisable(GL_LIGHTING);
-	glPushMatrix();											//Draw Shadow Object
+	glDisable(GL_LIGHTING);		//Draw Running Robot Shadow
+	glPushMatrix();
 		glMultMatrixf(shadowMat);
 		glRotatef(theta, 0, 1, 0);
-		glTranslatef(0, 1, -120);
+		glTranslatef(0, 1, -50);
 		glRotatef(90, 0, 1, 0);
 		glColor4f(0.2, 0.2, 0.2, 1.0);
-		drawModel();
+		drawRunningModel(true);
 	glPopMatrix();
 
-	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);		// Draw jumping robot
 	glPushMatrix();
-		glTranslatef(0, 0, -20);		// put the robot in place
+		glTranslatef(0, 0, -90);		// put the robot in place
 		glTranslatef(0, jumpHeight, 0);		// make the robot jump
-		drawJumpingRobot();
+		drawJumpingRobot(false);
 	glPopMatrix();
 
-	glEnable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);		//Draw jumping robot shadow
+	glPushMatrix();
+		glMultMatrixf(shadowMat);
+		glTranslatef(0, 0, -90);
+		glTranslatef(0, jumpHeight, 0);
+		drawJumpingRobot(true);
+	glPopMatrix();
+
+	glEnable(GL_LIGHTING);		//Draw dog
 	glPushMatrix();
 		glRotatef(-dogWalk, 0, 1, 0);
 		glTranslatef(0, 1, -20);
 		glRotatef(90, 0, 1, 0);		// to face where robot is moving
-		drawDog();
+		drawDog(false);
 	glPopMatrix();
 
+	glDisable(GL_LIGHTING);		//Draw dog shadow
 	glPushMatrix();
-		drawBB8();
+		glMultMatrixf(shadowMat);
+		glRotatef(-dogWalk, 0, 1, 0);
+		glTranslatef(0, 1, -20);
+		glRotatef(90, 0, 1, 0);
+		drawDog(true);
+	glPopMatrix();
+
+	glEnable(GL_LIGHTING);		//Draw bb8
+	glPushMatrix();
+		drawBB8(false);
+	glPopMatrix();
+
+	glDisable(GL_LIGHTING);		//Draw bb8 shadow
+	glPushMatrix();
+		glMultMatrixf(shadowMat);
+		drawBB8(true);
 	glPopMatrix();
 
 	glutSwapBuffers();   //Useful for animation
