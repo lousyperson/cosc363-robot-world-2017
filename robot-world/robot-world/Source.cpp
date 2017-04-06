@@ -14,9 +14,9 @@
 #include "loadTGA.h"
 
 GLUquadric *q;    //Required for creating cylindrical objects
-GLuint txId[1];		//Texture ids
+GLuint txId[2];		//Texture ids
 double theta = -10.5;
-int robotMovement = 0;
+float robotMovement = 0.0;
 bool flag = true;
 float lgt_src[4] = { 0.0f, 50.0f, 0.0f, 1.0f };
 float eye_x = 0, eye_y = 10, eye_z = 12;		//Initial camera position
@@ -44,8 +44,13 @@ unsigned int skybox[6];
 
 // dog inits
 float legLeft = 0;
-float legRight = 0;
 bool legLeftBool = true;
+float dogWalk = 0;
+
+// bb8 inits
+float bb8Rotation = 0;
+float bb8Movement = 0;
+bool bb8FrontBool = true;
 
 //void loadTexture(void)
 //{
@@ -61,11 +66,16 @@ bool legLeftBool = true;
 
 void loadTexture(void)
 {
-	glGenTextures(1, txId); 	// Create 1 texture id
+	glGenTextures(2, txId); 	// Create 1 texture id
 
 	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture
 	loadTGA("Floor.tga");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);		//Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[1]);  //Use this texture name for the following OpenGL texture
+	loadTGA("bb8.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -452,9 +462,9 @@ void drawDog(void)
 
 	glColor3f(0., 0., 1.);			//Left front leg
 	glPushMatrix();
-		//glTranslatef(-0.8, 4, 0);
-		//glRotatef(legLeft, 0, 0, 1);
-		//glTranslatef(0.8, -4, 0);
+		glTranslatef(-0.5, 3, 2.5);
+		glRotatef(legLeft, 1, 0, 0);
+		glTranslatef(0.5, -3, -2.5);
 		glTranslatef(-1, 0, 3);
 		glScalef(1, 3, 1);
 		glutSolidCube(1);
@@ -462,9 +472,9 @@ void drawDog(void)
 
 	glColor3f(0., 0., 1.);			//Right front leg
 	glPushMatrix();
-		//glTranslatef(0.8, 4, 0);
-		//glRotatef(-legRight, 0, 0, 1);
-		//glTranslatef(-0.8, -4, 0);
+		glTranslatef(0.5, 3, 2.5);
+		glRotatef(-legLeft, 1, 0, 0);
+		glTranslatef(-0.5, -3, -2.5);
 		glTranslatef(1, 0, 3);
 		glScalef(1, 3, 1);
 		glutSolidCube(1);
@@ -472,9 +482,9 @@ void drawDog(void)
 
 	glColor3f(0., 0., 1.);			//Left rear leg
 	glPushMatrix();
-		//glTranslatef(-2, 6.5, 0);
-		//glRotatef(legRight, 0, 0, 1);
-		//glTranslatef(2, -6.5, 0);
+		glTranslatef(-0.5, 3, -2.5);
+		glRotatef(-legLeft, 1, 0, 0);
+		glTranslatef(0.5, -3, 2.5);
 		glTranslatef(-1, 0, -3);
 		glScalef(1, 3, 1);
 		glutSolidCube(1);
@@ -482,13 +492,40 @@ void drawDog(void)
 
 	glColor3f(0., 0., 1.);			//Right rear leg
 	glPushMatrix();
-		//glTranslatef(2, 6.5, 0);
-		//glRotatef(legLeft, 0, 0, 1);
-		//glTranslatef(-2, -6.5, 0);
+		glTranslatef(0.5, 3, -2.5);
+		glRotatef(legLeft, 1, 0, 0);
+		glTranslatef(-0.5, -3, 2.5);
 		glTranslatef(1, 0, -3);
 		glScalef(1, 3, 1);
 		glutSolidCube(1);
 	glPopMatrix();
+}
+
+void dogTimer(int value)
+{
+	dogWalk++;		// make dog walk in circle
+	int dogAngle = 30;
+
+	if (!legLeftBool && legLeft < dogAngle)
+	{
+		legLeft++;
+		jumpLegAngle++;
+	}
+	else if (!legLeftBool)
+	{
+		legLeftBool = !legLeftBool;
+	}
+	else if (legLeftBool && legLeft > -dogAngle)
+	{
+		legLeft--;
+		jumpLegAngle--;
+	}
+	else if (legLeftBool)
+	{
+		legLeftBool = !legLeftBool;
+	}
+	glutPostRedisplay();
+	glutTimerFunc(50, dogTimer, 0);
 }
 
 void jumpTimer(int value)
@@ -524,6 +561,55 @@ void jumpTimer(int value)
 	glutTimerFunc(50, jumpTimer, 0);
 }
 
+void drawBB8(void)
+{
+	glColor4f(1.0, 1.0, 1.0, 1.0);
+
+	glEnable(GL_TEXTURE_2D);
+	gluQuadricTexture(q, GL_TRUE);
+	glBindTexture(GL_TEXTURE_2D, txId[1]);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glPushMatrix();		// BB8 Main Ball
+		glTranslatef(0, 0, bb8Movement);
+		glRotatef(-bb8Rotation, 0.0, 1.0, 0.0);
+		glTranslatef(0.0, 4.0, 0.0);
+		glRotatef(-120, 1, 0, 0);
+		gluSphere(q, 2.5, 36, 17);
+	glPopMatrix();
+
+	glPushMatrix();		// BB8 Head
+		glTranslatef(0, 0, bb8Movement);
+		glTranslatef(0.0, 6.5, 0.0);
+		glRotatef(-90, 1, 0, 0);
+		gluSphere(q, 1.5, 36, 17);
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+}
+
+void bb8Timer(int value)
+{
+	bb8Rotation+=10;		// continuously spinning
+	if (bb8FrontBool && bb8Movement < 30)
+	{
+		bb8Movement++;
+	}
+	else if (bb8FrontBool)
+	{
+		bb8FrontBool = !bb8FrontBool;
+	}
+	else if (!bb8FrontBool && bb8Movement > -30)
+	{
+		bb8Movement--;
+	}
+	else if (!bb8FrontBool)
+	{
+		bb8FrontBool = !bb8FrontBool;
+	}
+	glutPostRedisplay();
+	glutTimerFunc(50, bb8Timer, 0);
+}
+
 //---------------------------------------------------------------------
 void initialize(void)
 {
@@ -543,7 +629,8 @@ void initialize(void)
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
-	gluQuadricDrawStyle(q, GLU_FILL);
+	gluQuadricDrawStyle(q, GLU_FILL);  //used
+	gluQuadricNormals(q, GLU_SMOOTH);  //used
 	glClearColor(0.0, 0.0, 0.0, 0.0);  //Background colour
 
 	glMatrixMode(GL_PROJECTION);
@@ -594,7 +681,7 @@ void display(void)
 	glPushMatrix();											//Draw Actual Object
 		glRotatef(theta, 0, 1, 0);
 		glTranslatef(0, 1, -50);
-		glRotatef(90, 0, 1, 0);
+		glRotatef(90, 0, 1, 0);		// to face where robot is moving
 		drawModel();
 	glPopMatrix();
 
@@ -617,7 +704,14 @@ void display(void)
 
 	glEnable(GL_LIGHTING);
 	glPushMatrix();
+		glRotatef(-dogWalk, 0, 1, 0);
+		glTranslatef(0, 1, -20);
+		glRotatef(90, 0, 1, 0);		// to face where robot is moving
 		drawDog();
+	glPopMatrix();
+
+	glPushMatrix();
+		drawBB8();
 	glPopMatrix();
 
 	glutSwapBuffers();   //Useful for animation
@@ -627,8 +721,8 @@ void display(void)
 void special(int key, int x, int y)
 {
 	step = 0;
-	if (key == GLUT_KEY_LEFT) lookTheta += 0.1;   //in radians
-	else if (key == GLUT_KEY_RIGHT) lookTheta -= 0.1;
+	if (key == GLUT_KEY_LEFT) lookTheta += (5.0 * 3.14 / 180.0 );   //in radians
+	else if (key == GLUT_KEY_RIGHT) lookTheta -= (5.0 * 3.14 / 180.0);
 	else if (key == GLUT_KEY_DOWN) step = -1;
 	else if (key == GLUT_KEY_UP) step = 1;
 
@@ -649,6 +743,8 @@ int main(int argc, char** argv)
 	glutTimerFunc(50, myTimer, 0);
 	glutTimerFunc(50, robotTimer, 0);
 	glutTimerFunc(50, jumpTimer, 0);
+	glutTimerFunc(50, dogTimer, 0);
+	glutTimerFunc(50, bb8Timer, 0);
 	glutSpecialFunc(special);
 	glutMainLoop();
 	return 0;

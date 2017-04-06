@@ -1,0 +1,37 @@
+[2.1]	The scene should contain the model of at least one mobile robot.
+	The robot model may be constructed using a set of graphics primitives or by using any of the standard techniques for the construction of a mesh model.
+	You are not required to develop highly complex or articulated models for this task.
+
+[2.2]	The robot needs to perform an action. Design a simple task (animation) for this purpose, such as moving an object from one point to another,
+	or performing an acrobatic somersault!
+
+2.3	In addition to the robot(s), the scene should contain at least three other composite objects, each of which may be constructed using polygonal meshes,
+	or by combining two or more solid primitives (cubes, dodecahedron, teapot, cone etc.).
+	At least two of the composite objects must have some form of continuous animation.
+
+2.5 There must be at least two light sources in the scene, and at least two objects must have specular reflections.
+
+2.6 You should be able to move camera through the scene using the standard set of directional keys:
+	Up arrow: move camera forward in the current direction,
+	Down arrow: move camera backward in the current direction, keeping the look direction same,
+	Left arrow: Turn left by 5 degs,
+	Right arrow: Turn right by 5 degs.
+	The above key functions are specified only for marking convenience. You may assign a different set of keys for camera movement if necessary.
+
+2.7	At least three different textures must be used in the scene. It is not necessary to texture-map all surfaces.
+
+(1 mark)	Planar shadows cast by at least one object
+(1 mark)	A spot light on a moving/rotating object.
+			The movement of the light should be clearly visible. One of the two light sources in the scene can be used as a spotlight.
+(2 marks)	Two camera modes:
+			The first camera mode gives a general (default) view of the scene as described in 2.6 above.
+			The second camera mode, when selected, should show the view from a moving robot (first-person view).
+(1-3 marks depending on the complexity of the model)		Physics models (eg. gravity). Give relevant equations in your report.
+(1-2 marks)	A custom-built model designed using vertex coordinates and polygon definitions.
+			This will require evidence in the report of how the shape was designed. Include images of any sketches, diagrams that you have created.
+(1-2 marks)	A custom-built sweep surface, including extrusions, surfaces of revolution etc.
+			This will require evidence in the report of how the surface was generated. Include images of any sketches, diagrams used.
+(1-2 marks)	A surface shape generated using a mathematical formula (eg. paraboloids)
+(2-3 marks)	Collision detection
+(1 mark)	Skybox
+(2-4 marks)	Particle systems
