@@ -14,7 +14,7 @@
 #include "loadTGA.h"
 
 GLUquadric *q;    //Required for creating cylindrical objects
-GLuint txId[2];		//Texture ids
+GLuint txId[7];		//Texture ids
 double theta = -10.5;
 float robotMovement = 0.0;
 bool flag = true;
@@ -66,15 +66,40 @@ bool bb8FrontBool = true;
 
 void loadTexture(void)
 {
-	glGenTextures(2, txId); 	// Create 1 texture id
+	glGenTextures(7, txId); 	// Create 1 texture id
 
-	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture
-	loadTGA("Floor.tga");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);		//Set texture parameters
+	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture name for the following OpenGL texture
+	loadTGA("bb8.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glBindTexture(GL_TEXTURE_2D, txId[1]);  //Use this texture name for the following OpenGL texture
-	loadTGA("bb8.tga");
+	loadTGA("skybox/tropday_down.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[2]);  //Use this texture name for the following OpenGL texture
+	loadTGA("skybox/tropday_back.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[3]);  //Use this texture name for the following OpenGL texture
+	loadTGA("skybox/tropday_front.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[4]);  //Use this texture name for the following OpenGL texture
+	loadTGA("skybox/tropday_left.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[5]);  //Use this texture name for the following OpenGL texture
+	loadTGA("skybox/tropday_right.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[6]);  //Use this texture name for the following OpenGL texture
+	loadTGA("skybox/tropday_up.tga");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -107,70 +132,76 @@ void loadTexture(void)
 //	//skybox[SKY_BOTTOM] = loadTexture("skybox/bottom.tga");
 //}
 
-//void drawSkyBox(void)
-//{
-//	int size = 200;
-//	glDisable(GL_LIGHTING);		//turn off lighting, when making the skybox
+void drawSkyBox(void)
+{
+	float size = 200;
+	glDisable(GL_LIGHTING);		//turn off lighting, when making the skybox
 //	glDisable(GL_DEPTH_TEST);		//turn off depth texting
-//	glEnable(GL_TEXTURE_2D);		//and turn on texturing
-//
-//	glBindTexture(GL_TEXTURE_2D, skybox[SKY_BACK]);  //use the texture we want
-//	glBegin(GL_QUADS);
-//		//back face
-//	glTexCoord2f(0, 0); glVertex3f(size, 0, size);
-//	glTexCoord2f(1, 0); glVertex3f(0, 0, size);
-//	glTexCoord2f(1, 1); glVertex3f(0, size, size);
-//	glTexCoord2f(0, 1); glVertex3f(size, size, size);
-//	glEnd();
-//
-//	glBindTexture(GL_TEXTURE_2D, skybox[SKY_LEFT]);
-//	glBegin(GL_QUADS);
-//		//left face
-//	glTexCoord2f(0, 0); glVertex3f(0, 0, size);
-//	glTexCoord2f(1, 0); glVertex3f(0, 0, 0);
-//	glTexCoord2f(1, 1); glVertex3f(0, size, 0);
-//	glTexCoord2f(0, 1); glVertex3f(0, size, size);
-//	glEnd();
-//
-//	glBindTexture(GL_TEXTURE_2D, skybox[SKY_FRONT]);
-//	glBegin(GL_QUADS);
-//		//front face
-//	glTexCoord2f(0, 0); glVertex3f(0, size, 0);
-//	glTexCoord2f(1, 0); glVertex3f(size, size, 0);
-//	glTexCoord2f(1, 1); glVertex3f(size, size, size);
-//	glTexCoord2f(0, 1); glVertex3f(0, size, size);
-//	glEnd();
-//
-//	glBindTexture(GL_TEXTURE_2D, skybox[SKY_RIGHT]);
-//	glBegin(GL_QUADS);
-//		//right face
-//	glTexCoord2f(0, 0); glVertex3f(size, 0, 0);
-//	glTexCoord2f(1, 0); glVertex3f(size, 0, size);
-//	glTexCoord2f(1, 1); glVertex3f(size, size, size);
-//	glTexCoord2f(0, 1); glVertex3f(size, size, 0);
-//	glEnd();
-//
-//	glBindTexture(GL_TEXTURE_2D, skybox[SKY_TOP]);
-//	glBegin(GL_QUADS);
-//		//top face
-//	glTexCoord2f(0, 0); glVertex3f(0, 0, 0);
-//	glTexCoord2f(1, 0); glVertex3f(size, 0, 0);
-//	glTexCoord2f(1, 1); glVertex3f(size, size, 0);
-//	glTexCoord2f(0, 1); glVertex3f(0, size, 0);
-//	glEnd();
-//
-//	glBindTexture(GL_TEXTURE_2D, skybox[SKY_BOTTOM]);
-//	glBegin(GL_QUADS);
-//		//bottom face
-//	glTexCoord2f(0, 0); glVertex3f(0, 0, size);
-//	glTexCoord2f(1, 0); glVertex3f(size, 0, size);
-//	glTexCoord2f(1, 1); glVertex3f(size, 0, 0);
-//	glTexCoord2f(0, 1); glVertex3f(0, 0, 0);
-//	glEnd();
-//
-//	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);		//and turn on texturing
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glColor4f(1, 1, 1, 1.0);
+
+	glBindTexture(GL_TEXTURE_2D, txId[1]);
+	glNormal3f(0.0, 1.0, 0.0);
+	glBegin(GL_QUADS);   		 //down
+	glTexCoord2f(0, 0); glVertex3f(-size, -size, size);
+	glTexCoord2f(1, 0); glVertex3f(size, -size, size);
+	glTexCoord2f(1, 1); glVertex3f(size, -size, -size);
+	glTexCoord2f(0, 1); glVertex3f(-size, -size, -size);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, txId[2]);
+	glNormal3f(0.0, 0.0, -1.0);
+	glBegin(GL_QUADS);   		 //back
+	glTexCoord2f(0, 0); glVertex3f(size, -size, size);
+	glTexCoord2f(1, 0); glVertex3f(-size, -size, size);
+	glTexCoord2f(1, 1); glVertex3f(-size, size, size);
+	glTexCoord2f(0, 1); glVertex3f(size, size, size);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, txId[3]);
+	glNormal3f(0.0, 0.0, 1.0);
+	glBegin(GL_QUADS);   		 //front
+	glTexCoord2f(0, 0); glVertex3f(size, -size, -size);
+	glTexCoord2f(1, 0); glVertex3f(size, size, -size);
+	glTexCoord2f(1, 1); glVertex3f(-size, size, -size);
+	glTexCoord2f(0, 1); glVertex3f(-size, -size, -size);
+	
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, txId[4]);
+	glNormal3f(1.0, 0.0, 0.0);
+	glBegin(GL_QUADS);   		 //left
+	glTexCoord2f(0, 0); glVertex3f(size, -size, -size);
+	glTexCoord2f(1, 0); glVertex3f(size, -size, size);
+	glTexCoord2f(1, 1); glVertex3f(size, size, size);
+	glTexCoord2f(0, 1); glVertex3f(size, size, -size);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, txId[5]);
+	glNormal3f(-1.0, 0.0, 0.0);
+	glBegin(GL_QUADS);   		 //right
+	glTexCoord2f(0, 0); glVertex3f(-size, -size, size);
+	glTexCoord2f(1, 0); glVertex3f(-size, -size, -size);
+	glTexCoord2f(1, 1); glVertex3f(-size, size, -size);
+	glTexCoord2f(0, 1); glVertex3f(-size, size, size);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, txId[6]);
+	glNormal3f(0.0, -1.0, 0.0);
+	glBegin(GL_QUADS);   		 //up
+	glTexCoord2f(0, 0); glVertex3f(size, size, size);
+	glTexCoord2f(1, 0); glVertex3f(-size, size, size);
+	glTexCoord2f(1, 1); glVertex3f(-size, size, -size);
+	glTexCoord2f(0, 1); glVertex3f(size, size, -size);
+	
+	glEnd();
+
+	glEnable(GL_LIGHTING);
 //	glEnable(GL_DEPTH_TEST);
-//}
+}
 
 //void drawCube(void)
 //{
@@ -225,7 +256,7 @@ void loadTexture(void)
 void floor()
 {
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, txId[0]);
+	glBindTexture(GL_TEXTURE_2D, txId[1]);
 
 	glBegin(GL_QUADS);
 		glTexCoord2f(0, 150); glVertex3f(-200, 0, -200);
@@ -567,7 +598,7 @@ void drawBB8(void)
 
 	glEnable(GL_TEXTURE_2D);
 	gluQuadricTexture(q, GL_TRUE);
-	glBindTexture(GL_TEXTURE_2D, txId[1]);
+	glBindTexture(GL_TEXTURE_2D, txId[0]);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glPushMatrix();		// BB8 Main Ball
@@ -653,11 +684,11 @@ void display(void)
 	float d = 2;
 	glRotatef(angle_up_down, 0.0, 1.0, 0.0);
 
-	//if (eye_x + dir_x * step + dir_x * d < 14 && eye_x + dir_x * step + dir_x * d > -14 && eye_z + dir_z * step + dir_z * d < 14 && eye_z + dir_z * step + dir_z * d > -14)
-	//{
+	if (eye_x + dir_x * step + dir_x * d < 200 && eye_x + dir_x * step + dir_x * d > -200 && eye_z + dir_z * step + dir_z * d < 200 && eye_z + dir_z * step + dir_z * d > -200)
+	{
 		eye_x += dir_x * step;
 		eye_z += dir_z * step;
-	//}
+	}
 
 	look_x = eye_x + dir_x * d;
 	look_y = eye_y;
@@ -671,9 +702,9 @@ void display(void)
 
 	glLightfv(GL_LIGHT0, GL_POSITION, lgt_src);   //light position
 
-	floor();
+	//floor();
 	//drawCube();
-	//drawSkyBox();
+	drawSkyBox();
 
 	float shadowMat[16] = { lgt_src[1],0,0,0, -lgt_src[0],0,-lgt_src[2],-1, 0,0,lgt_src[1],0, 0,0,0,lgt_src[1] };
 
