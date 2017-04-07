@@ -16,9 +16,9 @@
 
 GLUquadric *q;    //Required for creating cylindrical objects
 GLuint txId[9];		//Texture ids
-float eye_x = 0.0f, eye_y = 10.0f, eye_z = 12.0f;		//Initial camera position
+float eye_x = -35.0f, eye_y = 10.0f, eye_z = 55.0f;		//Initial camera position
 float look_x = 0.0f, look_y = 10.0f, look_z = 10.0f;		//"Look-at" point along -z direction
-float lookTheta = 0.0f;		//Look angle
+float lookTheta = -0.174f;		//Look angle
 int step = 0;		//camera motion
 int cam_hgt = 150;
 float angle_left_right = 0.0f;
@@ -50,6 +50,9 @@ bool legLeftBool = true;
 float bb8Rotation = 0.0f;
 float bb8Movement = 0.0f;
 bool bb8FrontBool = true;
+
+// view mode
+bool freeView = true;
 
 void loadTexture(void)
 {
@@ -113,10 +116,10 @@ void drawSkyBox(void)
 	glEnable(GL_TEXTURE_2D);		//and turn on texturing
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glColor4f(1, 1, 1, 1.0);
 
-	//glBindTexture(GL_TEXTURE_2D, txId[1]);
+	//glBindTexture(GL_TEXTURE_2D, txId[1]);		// replaced by floor()
 	//glNormal3f(0.0, 1.0, 0.0);
 	//glBegin(GL_QUADS);   		 //down
 	//glTexCoord2f(0, 0); glVertex3f(-size, floorHeight, size);
@@ -298,7 +301,7 @@ void swingPickaxe(int value)
 {
 	if (stop)
 	{
-		cout << "done swing pickaxe" + to_string(swingAngle) + '\n';
+		//cout << "done swing pickaxe" + to_string(swingAngle) + '\n';
 		workerMovement = 0.0f;		// to pause the rest of body parts
 
 		if (!done && swingAngle < 0.0f)
@@ -340,7 +343,7 @@ void workerTimer(int value)
 {
 	if (!stop)
 	{
-		cout << "done worker timer" + to_string(theta) + '\n';
+		//cout << "done worker timer" + to_string(theta) + '\n';
 
 		// arc the robot is walking
 		if (workerForward && theta < 45)
@@ -630,7 +633,7 @@ void drawBB8(bool isShadow)
 		glEnable(GL_TEXTURE_2D);
 		gluQuadricTexture(q, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D, txId[0]);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
 
 	glPushMatrix();		// BB8 Main Ball
@@ -679,11 +682,11 @@ void drawOres(bool isShadow)
 	if (isShadow) glColor3f(0.25, 0.25, 0.25);
 	else
 	{
-		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glColor4f(1.0, 1.0, 1.0, 1.0);        //Base colour
 		glEnable(GL_TEXTURE_2D);
 		gluQuadricTexture(q, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D, txId[7]);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
 
 	glPushMatrix();		// Gold nugget
@@ -699,7 +702,7 @@ void drawOres(bool isShadow)
 		glEnable(GL_TEXTURE_2D);
 		gluQuadricTexture(q, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D, txId[8]);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
 
 	glPushMatrix();		// Silver ore
@@ -777,7 +780,16 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	gluLookAt(eye_x, eye_y, eye_z, look_x, look_y, look_z, 0, 1, 0);
+	if (freeView)
+	{
+		gluLookAt(eye_x, eye_y, eye_z, look_x, look_y, look_z, 0, 1, 0);
+	}
+	else
+	{
+		gluLookAt(0, 8 + jumpHeight, -90,
+				  0, 8 + jumpHeight, -89,
+				  0, 1, 0);
+	}
 
 	glLightfv(GL_LIGHT0, GL_POSITION, lgt_src);   // light position
 
@@ -807,7 +819,7 @@ void display(void)
 	glDisable(GL_LIGHTING);		//Draw Worker Robot Shadow
 	glPushMatrix();
 		glMultMatrixf(shadowMat);
-		if (!workerForward)
+		if (done)
 		{
 			glRotatef(theta, 0, 1, 0);
 			glTranslatef(0, 1, -50);
@@ -885,12 +897,24 @@ void display(void)
 void special(int key, int x, int y)
 {
 	step = 0;
-	if (key == GLUT_KEY_LEFT) lookTheta += (5.0 * 3.14 / 180.0 );   //in radians
-	else if (key == GLUT_KEY_RIGHT) lookTheta -= (5.0 * 3.14 / 180.0);
-	else if (key == GLUT_KEY_DOWN) step = -1;
-	else if (key == GLUT_KEY_UP) step = 1;
+
+	if (freeView)
+	{
+		if (key == GLUT_KEY_LEFT) lookTheta += (5.0 * 3.14 / 180.0);   //in radians
+		else if (key == GLUT_KEY_RIGHT) lookTheta -= (5.0 * 3.14 / 180.0);
+		else if (key == GLUT_KEY_DOWN) step = -1;
+		else if (key == GLUT_KEY_UP) step = 1;
+	}
 
 	glutPostRedisplay();
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+	if (key == ' ')
+	{
+		freeView = !freeView;
+	}
 }
 
 //---------------------------------------------------------------------
@@ -910,6 +934,7 @@ int main(int argc, char** argv)
 	glutTimerFunc(50, dogTimer, 0);
 	glutTimerFunc(50, bb8Timer, 0);
 	glutSpecialFunc(special);
+	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 	return 0;
 }
