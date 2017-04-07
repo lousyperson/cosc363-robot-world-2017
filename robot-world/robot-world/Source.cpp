@@ -18,12 +18,10 @@ GLuint txId[7];		//Texture ids
 double theta = -10.5;
 float robotMovement = 0.0;
 bool flag = true;
-float lgt_src[4] = { 0.0f, 200.0f, 0.0f, 1.0f };
 float eye_x = 0, eye_y = 10, eye_z = 12;		//Initial camera position
 float look_x = 0, look_y = 10, look_z = 10;		//"Look-at" point along -z direction
 float lookTheta = 0;		//Look angle
 int step = 0;		//camera motion
-float angle_up_down = 1.0;
 int cam_hgt = 150;
 float angle_left_right = 0.0;
 
@@ -82,7 +80,7 @@ void loadTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 void drawSkyBox(void)
@@ -158,24 +156,45 @@ void drawSkyBox(void)
 //	glEnable(GL_DEPTH_TEST);
 }
 
-void floor()
-{
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, txId[1]);
-
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 150); glVertex3f(-200, 0, -200);
-		glTexCoord2f(0, 0); glVertex3f(-200, 0, 200);
-		glTexCoord2f(150, 0); glVertex3f(200, 0, 200);
-		glTexCoord2f(150, 150); glVertex3f(200, 0, -200);
-	glEnd();
-	glDisable(GL_TEXTURE_2D);
-}
+//void floor()
+//{
+//	float floorHeight = -0.1f;
+//
+//	float white[4] = { 1., 1., 1., 1. };
+//	float black[4] = { 0 };
+//	glColor4f(0.7, 0.7, 0.7, 1.0);  //The floor is gray in colour
+//	glNormal3f(0.0, 1.0, 0.0);
+//
+//	glMaterialfv(GL_FRONT, GL_SPECULAR, black);
+//
+//	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
+//	glBegin(GL_QUADS);
+//	for (int i = -200; i < 200; i++)
+//	{
+//		for (int j = -200; j < 200; j++)
+//		{
+//			glVertex3f(i, floorHeight, j);
+//			glVertex3f(i, floorHeight, j + 1);
+//			glVertex3f(i + 1, floorHeight, j + 1);
+//			glVertex3f(i + 1, floorHeight, j);
+//		}
+//	}
+//	glEnd();
+//	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+//}
 
 //--Draws a character model constructed using GLUT objects ------------------
 void drawRunningModel(bool isShadow)
 {
 	glDisable(GL_TEXTURE_2D);
+
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(0.078, 1, 0.258);		//Headlight
+	glPushMatrix();
+		glTranslatef(0, 6, -0.8);
+		glRotatef(45, 1, 0, 0);
+		glutSolidCube(0.5);
+	glPopMatrix();
 
 	if (isShadow) glColor3f(0.25, 0.25, 0.25);
 	else glColor3f(1., 0.78, 0.06);		//Head
@@ -231,15 +250,10 @@ void drawRunningModel(bool isShadow)
 	glPopMatrix();
 }
 
-void myTimer(int value)
-{
-	theta += 2;
-	glutPostRedisplay();
-	glutTimerFunc(50, myTimer, 0);
-}
-
 void robotTimer(int value)
 {
+	theta += 2;		// arc the robot is walking
+
 	if (flag && robotMovement < 30)
 	{
 		robotMovement++;
@@ -558,30 +572,36 @@ void initialize(void)
 
 	float grey[4] = { 0.2, 0.2, 0.2, 1.0 };
 	float white[4] = { 1.0, 1.0, 1.0, 1.0 };
+	float green[4] = { 0.0, 1.0, 0.0, 1.0 };
 
 	q = gluNewQuadric();
 
 	glEnable(GL_LIGHTING);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+	glMaterialf(GL_FRONT, GL_SHININESS, 50);
+
 	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, grey);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white);
 
+	glEnable(GL_LIGHT1);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, green);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, green);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
-	gluQuadricDrawStyle(q, GLU_FILL);  //used
-	gluQuadricNormals(q, GLU_SMOOTH);  //used
+	gluQuadricDrawStyle(q, GLU_FILL);
+	gluQuadricNormals(q, GLU_SMOOTH);
 	glClearColor(0.0, 0.0, 0.0, 0.0);  //Background colour
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60., 1.0, 10.0, 1000.0);   //Perspective projection
-
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
-	glMaterialf(GL_FRONT, GL_SHININESS, 50);
 
 	//initSkybox();
 }
@@ -589,38 +609,43 @@ void initialize(void)
 //-------------------------------------------------------------------
 void display(void)
 {
+	float lgt_src[4] = { 0.0f, 200.0f, 0.0f, 1.0f };
+	float spot_pos[] = { 0.0f, 6.0f, -0.8f, 1.0f };
+	float spotdir[] = { 0.0f, -1.0f, -1.0f, 1.0f };
+
+	// camera position and limit the movement within skybox
 	float dir_x = -sin(lookTheta), dir_y = 0, dir_z = -cos(lookTheta);
 	float d = 2;
-	glRotatef(angle_up_down, 0.0, 1.0, 0.0);
-
 	if (eye_x + dir_x * step + dir_x * d < 200 && eye_x + dir_x * step + dir_x * d > -200 && eye_z + dir_z * step + dir_z * d < 200 && eye_z + dir_z * step + dir_z * d > -200)
 	{
 		eye_x += dir_x * step;
 		eye_z += dir_z * step;
 	}
-
 	look_x = eye_x + dir_x * d;
 	look_y = eye_y;
 	look_z = eye_z + dir_z * d;
 
+	// OpenGL Lighting
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	gluLookAt(eye_x, eye_y, eye_z, look_x, look_y, look_z, 0, 1, 0);
 
-	glLightfv(GL_LIGHT0, GL_POSITION, lgt_src);   //light position
+	glLightfv(GL_LIGHT0, GL_POSITION, lgt_src);   // light position
 
 	//floor();
-	//drawCube();
 	drawSkyBox();
 
 	float shadowMat[16] = { lgt_src[1],0,0,0, -lgt_src[0],0,-lgt_src[2],-1, 0,0,lgt_src[1],0, 0,0,0,lgt_src[1] };
 
 	glEnable(GL_LIGHTING);		//Draw Running Robot
+	glEnable(GL_LIGHT1);
 	glPushMatrix();
 		glRotatef(theta, 0, 1, 0);
 		glTranslatef(0, 1, -50);
+		glLightfv(GL_LIGHT1, GL_POSITION, spot_pos);
+		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
 		glRotatef(90, 0, 1, 0);		// to face where robot is moving
 		drawRunningModel(false);
 	glPopMatrix();
@@ -704,8 +729,7 @@ int main(int argc, char** argv)
 	initialize();
 
 	glutDisplayFunc(display);
-	glutTimerFunc(50, myTimer, 0);
-	glutTimerFunc(50, robotTimer, 0);
+	glutTimerFunc(50, robotTimer, 0);		// temp to see forehead pos
 	glutTimerFunc(50, jumpTimer, 0);
 	glutTimerFunc(50, dogTimer, 0);
 	glutTimerFunc(50, bb8Timer, 0);
