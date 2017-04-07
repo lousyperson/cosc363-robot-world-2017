@@ -447,64 +447,6 @@ void drawJumpingRobot(bool isShadow)
 	glPopMatrix();
 }
 
-void drawVolleyballRobot(void)
-{
-	glDisable(GL_TEXTURE_2D);
-
-	glColor3f(1., 0.78, 0.06);		//Head
-	glPushMatrix();
-		glTranslatef(0, 7.7, 0);
-		glutSolidCube(1.4);
-	glPopMatrix();
-
-	glColor3f(1., 0., 0.);			//Torso
-	glPushMatrix();
-		glTranslatef(0, 5.5, 0);
-		glScalef(3, 3, 1.4);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glColor3f(0., 0., 1.);			//Right leg
-	glPushMatrix();
-		glTranslatef(-0.8, 4, 0);
-		glRotatef(jumpLegAngle, 0, 0, 1);
-		glTranslatef(0.8, -4, 0);
-		glTranslatef(-0.8, 2.2, 0);
-		glScalef(1, 4.4, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glColor3f(0., 0., 1.);			//Left leg
-	glPushMatrix();
-		glTranslatef(0.8, 4, 0);
-		glRotatef(-jumpLegAngle, 0, 0, 1);
-		glTranslatef(-0.8, -4, 0);
-		glTranslatef(0.8, 2.2, 0);
-		glScalef(1, 4.4, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glColor3f(0., 0., 1.);			//Right arm
-	glPushMatrix();
-		glTranslatef(-2, 6.5, 0);
-		glRotatef(jumpHandAngle, 0, 0, 1);
-		glTranslatef(2, -6.5, 0);
-		glTranslatef(-2, 5, 0);
-		glScalef(1, 4, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glColor3f(0., 0., 1.);			//Left arm
-	glPushMatrix();
-		glTranslatef(2, 6.5, 0);
-		glRotatef(-jumpHandAngle, 0, 0, 1);
-		glTranslatef(-2, -6.5, 0);
-		glTranslatef(2, 5, 0);
-		glScalef(1, 4, 1);
-		glutSolidCube(1);
-	glPopMatrix();
-}
-
 void drawDog(bool isShadow)
 {
 	glDisable(GL_TEXTURE_2D);
