@@ -12,38 +12,48 @@
 #include <math.h>
 #include <GL/freeglut.h>
 #include "loadTGA.h"
+#include <string>
 
 GLUquadric *q;    //Required for creating cylindrical objects
-GLuint txId[7];		//Texture ids
-double theta = -10.5;
-float robotMovement = 0.0;
-bool flag = true;
-float eye_x = 0, eye_y = 10, eye_z = 12;		//Initial camera position
-float look_x = 0, look_y = 10, look_z = 10;		//"Look-at" point along -z direction
-float lookTheta = 0;		//Look angle
+GLuint txId[9];		//Texture ids
+float eye_x = 0.0f, eye_y = 10.0f, eye_z = 12.0f;		//Initial camera position
+float look_x = 0.0f, look_y = 10.0f, look_z = 10.0f;		//"Look-at" point along -z direction
+float lookTheta = 0.0f;		//Look angle
 int step = 0;		//camera motion
 int cam_hgt = 150;
-float angle_left_right = 0.0;
+float angle_left_right = 0.0f;
+
+// worker robot inits
+float theta = 0.0f;
+float workerMovement = 0.0f;
+bool workerFlag = true;
+bool workerForward = true;
+
+// doing work
+bool stop = false;
+float swingAngle = -1.0f;
+int count = 0;
+bool done = false;
 
 // jumping robot inits
-float jumpHandAngle = 0;
-float jumpLegAngle = 0;
+float jumpHandAngle = 0.0f;
+float jumpLegAngle = 0.0f;
 int jumpHeight = 0;
 bool jumpUpBool = true;
 
 // dog inits
-float legLeft = 0;
+float legLeft = 0.0f;
+float dogWalk = 0.0f;
 bool legLeftBool = true;
-float dogWalk = 0;
 
 // bb8 inits
-float bb8Rotation = 0;
-float bb8Movement = 0;
+float bb8Rotation = 0.0f;
+float bb8Movement = 0.0f;
 bool bb8FrontBool = true;
 
 void loadTexture(void)
 {
-	glGenTextures(7, txId); 	// Create 1 texture id
+	glGenTextures(9, txId); 	// Create 1 texture id
 
 	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture name for the following OpenGL texture
 	loadTGA("bb8.tga");
@@ -80,6 +90,16 @@ void loadTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	glBindTexture(GL_TEXTURE_2D, txId[7]);  //Use this texture name for the following OpenGL texture
+	loadTGA("Gold-Nugget.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[8]);  //Use this texture name for the following OpenGL texture
+	loadTGA("silver.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
@@ -96,14 +116,14 @@ void drawSkyBox(void)
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glColor4f(1, 1, 1, 1.0);
 
-	glBindTexture(GL_TEXTURE_2D, txId[1]);
-	glNormal3f(0.0, 1.0, 0.0);
-	glBegin(GL_QUADS);   		 //down
-	glTexCoord2f(0, 0); glVertex3f(-size, floorHeight, size);
-	glTexCoord2f(1, 0); glVertex3f(size, floorHeight, size);
-	glTexCoord2f(1, 1); glVertex3f(size, floorHeight, -size);
-	glTexCoord2f(0, 1); glVertex3f(-size, floorHeight, -size);
-	glEnd();
+	//glBindTexture(GL_TEXTURE_2D, txId[1]);
+	//glNormal3f(0.0, 1.0, 0.0);
+	//glBegin(GL_QUADS);   		 //down
+	//glTexCoord2f(0, 0); glVertex3f(-size, floorHeight, size);
+	//glTexCoord2f(1, 0); glVertex3f(size, floorHeight, size);
+	//glTexCoord2f(1, 1); glVertex3f(size, floorHeight, -size);
+	//glTexCoord2f(0, 1); glVertex3f(-size, floorHeight, -size);
+	//glEnd();
 
 	glBindTexture(GL_TEXTURE_2D, txId[2]);
 	glNormal3f(0.0, 0.0, -1.0);
@@ -156,35 +176,36 @@ void drawSkyBox(void)
 //	glEnable(GL_DEPTH_TEST);
 }
 
-//void floor()
-//{
-//	float floorHeight = -0.1f;
-//
-//	float white[4] = { 1., 1., 1., 1. };
-//	float black[4] = { 0 };
-//	glColor4f(0.7, 0.7, 0.7, 1.0);  //The floor is gray in colour
-//	glNormal3f(0.0, 1.0, 0.0);
-//
-//	glMaterialfv(GL_FRONT, GL_SPECULAR, black);
-//
-//	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
-//	glBegin(GL_QUADS);
-//	for (int i = -200; i < 200; i++)
-//	{
-//		for (int j = -200; j < 200; j++)
-//		{
-//			glVertex3f(i, floorHeight, j);
-//			glVertex3f(i, floorHeight, j + 1);
-//			glVertex3f(i + 1, floorHeight, j + 1);
-//			glVertex3f(i + 1, floorHeight, j);
-//		}
-//	}
-//	glEnd();
-//	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
-//}
+void floor()
+{
+	float floorHeight = -0.2f;
+	float size = 150.0f;
+
+	float white[4] = { 1., 1., 1., 1. };
+	float black[4] = { 0 };
+	glColor4f(0.560, 0.560, 0.419, 1.0);  //The floor is brown in colour
+	glNormal3f(0.0, 1.0, 0.0);
+
+	glMaterialfv(GL_FRONT, GL_SPECULAR, black);
+
+	//The floor is made up of several tiny squares on a 200x200 grid. Each square has a unit size.
+	glBegin(GL_QUADS);
+	for (int i = -200; i < 200; i++)
+	{
+		for (int j = -200; j < 200; j++)
+		{
+			glVertex3f(i, floorHeight, j);
+			glVertex3f(i, floorHeight, j + 1);
+			glVertex3f(i + 1, floorHeight, j + 1);
+			glVertex3f(i + 1, floorHeight, j);
+		}
+	}
+	glEnd();
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+}
 
 //--Draws a character model constructed using GLUT objects ------------------
-void drawRunningModel(bool isShadow)
+void drawWorkerModel(bool isShadow)
 {
 	glDisable(GL_TEXTURE_2D);
 
@@ -215,7 +236,7 @@ void drawRunningModel(bool isShadow)
 	else glColor3f(0., 0., 1.);			//Right leg
 	glPushMatrix();
 		glTranslatef(-0.8, 1.8, 0);
-		glRotatef(-robotMovement, 1, 0, 0);
+		glRotatef(-workerMovement, 1, 0, 0);
 		glTranslatef(0.8, -1.8, 0);
 		glTranslatef(-0.8, 0, 0);
 		glScalef(1, 4.4, 1);
@@ -224,7 +245,7 @@ void drawRunningModel(bool isShadow)
 		
 	glPushMatrix();		//Left leg
 		glTranslatef(0.8, 1.8, 0);
-		glRotatef(robotMovement, 1, 0, 0);
+		glRotatef(workerMovement, 1, 0, 0);
 		glTranslatef(-0.8, -1.8, 0);
 		glTranslatef(0.8, 0, 0);
 		glScalef(1, 4.4, 1);
@@ -233,7 +254,7 @@ void drawRunningModel(bool isShadow)
 
 	glPushMatrix();		//Right arm
 		glTranslatef(-2, 4.3, 0);
-		glRotatef(robotMovement, 1, 0, 0);
+		glRotatef(workerMovement, 1, 0, 0);
 		glTranslatef(2, -4.3, 0);
 		glTranslatef(-2, 2.8, 0);
 		glScalef(1, 4, 1);
@@ -242,38 +263,127 @@ void drawRunningModel(bool isShadow)
 
 	glPushMatrix();		//Left arm
 		glTranslatef(2, 4.3, 0);
-		glRotatef(-robotMovement, 1, 0, 0);
+		glRotatef(-workerMovement, 1, 0, 0);
+		glRotatef(swingAngle, 1, 0, 0);
 		glTranslatef(-2, -4.3, 0);
 		glTranslatef(2, 2.8, 0);
 		glScalef(1, 4, 1);
 		glutSolidCube(1);
 	glPopMatrix();
+
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else glColor3f(0.545, 0.270, 0.074);			//Pickaxe
+	glPushMatrix();
+	glTranslatef(2, 4.3, 0);
+	glRotatef(-workerMovement, 1, 0, 0);
+	glRotatef(swingAngle, 1, 0, 0);
+	glTranslatef(-2, -4.3, 0);
+	glTranslatef(2, 1, -2.5);
+	glScalef(1, 1, 8);
+	glutSolidCube(0.5);
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(2, 4.3, 0);
+		glRotatef(-workerMovement, 1, 0, 0);
+		glRotatef(swingAngle, 1, 0, 0);
+		glTranslatef(-2, -4.3, 0);
+		glTranslatef(2, 1, -5);
+		glRotatef(90, 1, 0, 0);
+		glutSolidCone(0.5, 3, 36, 17);
+	glPopMatrix();
 }
 
-void robotTimer(int value)
+void swingPickaxe(int value)
 {
-	theta += 2;		// arc the robot is walking
+	if (stop)
+	{
+		cout << "done swing pickaxe" + to_string(swingAngle) + '\n';
+		workerMovement = 0.0f;		// to pause the rest of body parts
 
-	if (flag && robotMovement < 30)
-	{
-		robotMovement++;
-	}
-	else if (flag)
-	{
-		flag = !flag;
-		robotMovement--;
-	}
-	else if (!flag && robotMovement > -30)
-	{
-		robotMovement--;
-	}
-	else
-	{
-		flag = !flag;
-		robotMovement++;
+		if (!done && swingAngle < 0.0f)
+		{
+			swingAngle = 180.0f;
+			swingAngle -= 20.0f;
+		}
+		else if (!done && swingAngle > 0.0f)
+		{
+			swingAngle -= 20.0f;
+		}
+		else if (!done)
+		{
+			done = !done;
+			swingAngle = -1.0f;
+			stop = !stop;
+		}
+		else if (done && swingAngle < 0.0f)
+		{
+			swingAngle = 180.0f;
+			swingAngle -= 20.0f;
+		}
+		else if (done && swingAngle > 0.0f)
+		{
+			swingAngle -= 20.0f;
+		}
+		else if (done)
+		{
+			done = !done;
+			swingAngle = -1.0f;
+			stop = !stop;
+		}
 	}
 	glutPostRedisplay();
-	glutTimerFunc(50, robotTimer, 0);
+	glutTimerFunc(50, swingPickaxe, 0);
+}
+
+void workerTimer(int value)
+{
+	if (!stop)
+	{
+		cout << "done worker timer" + to_string(theta) + '\n';
+
+		// arc the robot is walking
+		if (workerForward && theta < 45)
+		{
+			theta += 1;
+		}
+		else if (workerForward)
+		{
+			stop = !stop;
+			workerForward = !workerForward;
+		}
+		else if (!workerForward && theta > 0)
+		{
+			theta -= 1;
+		}
+		else if (!workerForward)
+		{
+			stop = !stop;
+			workerForward = !workerForward;
+		}
+
+		// just hands and legs swinging
+		if (workerFlag && workerMovement < 30)
+		{
+			workerMovement++;
+		}
+		else if (workerFlag)
+		{
+			workerFlag = !workerFlag;
+			workerMovement--;
+		}
+		else if (!workerFlag && workerMovement > -30)
+		{
+			workerMovement--;
+		}
+		else
+		{
+			workerFlag = !workerFlag;
+			workerMovement++;
+		}
+	}
+	glutPostRedisplay();
+	glutTimerFunc(50, workerTimer, 0);
 }
 
 void drawJumpingRobot(bool isShadow)
@@ -564,6 +674,43 @@ void bb8Timer(int value)
 	glutTimerFunc(50, bb8Timer, 0);
 }
 
+void drawOres(bool isShadow)
+{
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else
+	{
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glEnable(GL_TEXTURE_2D);
+		gluQuadricTexture(q, GL_TRUE);
+		glBindTexture(GL_TEXTURE_2D, txId[7]);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	}
+
+	glPushMatrix();		// Gold nugget
+	glRotatef(53, 0, 1, 0);
+	glTranslatef(0, 1, -50);
+	gluSphere(q, 2.5, 36, 17);
+	glPopMatrix();
+
+	if (isShadow) glColor3f(0.25, 0.25, 0.25);
+	else
+	{
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glEnable(GL_TEXTURE_2D);
+		gluQuadricTexture(q, GL_TRUE);
+		glBindTexture(GL_TEXTURE_2D, txId[8]);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	}
+
+	glPushMatrix();		// Silver ore
+	glRotatef(-8, 0, 1, 0);
+	glTranslatef(0, 1, -50);
+	gluSphere(q, 2.5, 36, 17);
+	glPopMatrix();
+
+	if (!isShadow) glDisable(GL_TEXTURE_2D);
+}
+
 //---------------------------------------------------------------------
 void initialize(void)
 {
@@ -572,7 +719,7 @@ void initialize(void)
 
 	float grey[4] = { 0.2, 0.2, 0.2, 1.0 };
 	float white[4] = { 1.0, 1.0, 1.0, 1.0 };
-	float green[4] = { 0.0, 1.0, 0.0, 1.0 };
+	//float green[4] = { 0.0, 1.0, 0.0, 1.0 };
 
 	q = gluNewQuadric();
 
@@ -590,8 +737,8 @@ void initialize(void)
 	glEnable(GL_LIGHT1);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, green);
-	glLightfv(GL_LIGHT1, GL_SPECULAR, green);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, white);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, white);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
@@ -634,30 +781,45 @@ void display(void)
 
 	glLightfv(GL_LIGHT0, GL_POSITION, lgt_src);   // light position
 
-	//floor();
+	floor();
 	drawSkyBox();
 
 	float shadowMat[16] = { lgt_src[1],0,0,0, -lgt_src[0],0,-lgt_src[2],-1, 0,0,lgt_src[1],0, 0,0,0,lgt_src[1] };
 
-	glEnable(GL_LIGHTING);		//Draw Running Robot
-	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHTING);		//Draw Worker Robot
 	glPushMatrix();
+		if (done)
+		{
+			glRotatef(theta, 0, 1, 0);
+			glTranslatef(0, 1, -50);
+			glRotatef(180, 0, 1, 0);
+			glTranslatef(0, -1, 50);
+			glRotatef(-theta, 0, 1, 0);
+		}
 		glRotatef(theta, 0, 1, 0);
 		glTranslatef(0, 1, -50);
+		glRotatef(90, 0, 1, 0);		// to face where robot is moving
 		glLightfv(GL_LIGHT1, GL_POSITION, spot_pos);
 		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
-		glRotatef(90, 0, 1, 0);		// to face where robot is moving
-		drawRunningModel(false);
+		drawWorkerModel(false);
 	glPopMatrix();
 
-	glDisable(GL_LIGHTING);		//Draw Running Robot Shadow
+	glDisable(GL_LIGHTING);		//Draw Worker Robot Shadow
 	glPushMatrix();
 		glMultMatrixf(shadowMat);
+		if (!workerForward)
+		{
+			glRotatef(theta, 0, 1, 0);
+			glTranslatef(0, 1, -50);
+			glRotatef(180, 0, 1, 0);
+			glTranslatef(0, -1, 50);
+			glRotatef(-theta, 0, 1, 0);
+		}
 		glRotatef(theta, 0, 1, 0);
 		glTranslatef(0, 1, -50);
 		glRotatef(90, 0, 1, 0);
 		glColor4f(0.2, 0.2, 0.2, 1.0);
-		drawRunningModel(true);
+		drawWorkerModel(true);
 	glPopMatrix();
 
 	glEnable(GL_LIGHTING);		// Draw jumping robot
@@ -703,6 +865,19 @@ void display(void)
 		drawBB8(true);
 	glPopMatrix();
 
+	glEnable(GL_LIGHTING);		// Draw ores
+	glPushMatrix();
+		drawOres(false);
+	glPopMatrix();
+
+	glDisable(GL_LIGHTING);		//Draw ores shadow
+	glPushMatrix();
+		glMultMatrixf(shadowMat);
+		drawOres(true);
+	glPopMatrix();
+
+	glEnable(GL_LIGHTING);
+
 	glutSwapBuffers();   //Useful for animation
 }
 
@@ -729,7 +904,8 @@ int main(int argc, char** argv)
 	initialize();
 
 	glutDisplayFunc(display);
-	glutTimerFunc(50, robotTimer, 0);		// temp to see forehead pos
+	glutTimerFunc(50, workerTimer, 0);		// temp to see forehead pos
+	glutTimerFunc(50, swingPickaxe, 0);
 	glutTimerFunc(50, jumpTimer, 0);
 	glutTimerFunc(50, dogTimer, 0);
 	glutTimerFunc(50, bb8Timer, 0);

@@ -2,10 +2,10 @@
 	The robot model may be constructed using a set of graphics primitives or by using any of the standard techniques for the construction of a mesh model.
 	You are not required to develop highly complex or articulated models for this task.
 
-2.2	The robot needs to perform an action. Design a simple task (animation) for this purpose, such as moving an object from one point to another,
+[2.2]	The robot needs to perform an action. Design a simple task (animation) for this purpose, such as moving an object from one point to another,
 	or performing an acrobatic somersault!
 
-2.3	In addition to the robot(s), the scene should contain at least three other composite objects, each of which may be constructed using polygonal meshes,
+[2.3]	In addition to the robot(s), the scene should contain at least three other composite objects, each of which may be constructed using polygonal meshes,
 	or by combining two or more solid primitives (cubes, dodecahedron, teapot, cone etc.).
 	At least two of the composite objects must have some form of continuous animation.
 
